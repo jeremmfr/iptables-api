@@ -14,7 +14,7 @@ import (
 
 func dnatGenerate(r *http.Request) []string {
 	vars := mux.Vars(r)
-	rulespecs := append([]string{"-p", vars["proto"], "-i", vars["iface"]})
+	rulespecs := []string{"-p", vars["proto"], "-i", vars["iface"]}
 	if r.URL.Query().Get("except") == trueStr {
 		rulespecs = append(rulespecs, "!")
 	}
@@ -42,7 +42,7 @@ func dnatGenerate(r *http.Request) []string {
 
 func snatGenerate(r *http.Request) []string {
 	vars := mux.Vars(r)
-	rulespecs := append([]string{"-p", vars["proto"], "-o", vars["iface"]})
+	rulespecs := []string{"-p", vars["proto"], "-o", vars["iface"]}
 	srcRange := strings.Contains(vars["source"], "-")
 	dstRange := strings.Contains(vars["destination"], "-")
 	if srcRange {
