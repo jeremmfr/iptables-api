@@ -1,8 +1,9 @@
 # iptables-api
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/jeremmfr/iptables-api)
+[![Go Status](https://github.com/jeremmfr/iptables-api/workflows/Go%20Tests/badge.svg)](https://github.com/jeremmfr/iptables-api/actions)
+[![Lint Status](https://github.com/jeremmfr/iptables-api/workflows/GolangCI-Lint/badge.svg)](https://github.com/jeremmfr/iptables-api/actions)
 [![GoDoc](https://godoc.org/github.com/jeremmfr/iptables-api?status.svg)](https://godoc.org/github.com/jeremmfr/iptables-api)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jeremmfr/iptables-api)](https://goreportcard.com/report/github.com/jeremmfr/iptables-api)
-[![Build Status](https://travis-ci.org/jeremmfr/iptables-api.svg?branch=master)](https://travis-ci.org/jeremmfr/iptables-api)
 
 Create API REST for iptables command
 
