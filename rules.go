@@ -134,7 +134,6 @@ func checkPosRules(r *http.Request) ([]string, error) {
 		}
 	}
 	return linenumber, nil
-
 }
 
 // PUT /rules/{action}/{chain}/{proto}/{iface_in}/{iface_out}/{source}/{destination}/?sports=00&dports=00

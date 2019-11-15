@@ -1,0 +1,20 @@
+linters:
+  enable-all: true
+  disable:
+    - funlen
+    - wsl
+    - dupl
+    - gochecknoglobals
+    - lll
+linters-settings:
+  gocognit:
+    # minimal code complexity to report, 30 by default
+    min-complexity: 60
+issues:
+  exclude-rules:
+    - text: "TLS InsecureSkipVerify set true"
+      linters:
+        - gosec
+    - text: "G204: Subprocess launched with function call as argument or cmd arguments"
+      linters:
+        - gosec
