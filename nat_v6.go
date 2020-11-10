@@ -21,14 +21,14 @@ func dnatGenerateV6(r *http.Request) []string {
 	srcRange := strings.Contains(vars["source"], "-")
 	dstRange := strings.Contains(vars["destination"], "-")
 	if srcRange {
-		rulespecs = append(rulespecs, "-m", "iprange", "--src-range", strings.Replace(vars["source"], "_128", "", -1))
+		rulespecs = append(rulespecs, "-m", "iprange", "--src-range", strings.ReplaceAll(vars["source"], "_128", ""))
 	} else {
-		rulespecs = append(rulespecs, "-s", strings.Replace(vars["source"], "_", "/", -1))
+		rulespecs = append(rulespecs, "-s", strings.ReplaceAll(vars["source"], "_", "/"))
 	}
 	if dstRange {
-		rulespecs = append(rulespecs, "-m", "iprange", "--dst-range", strings.Replace(vars["destination"], "_128", "", -1))
+		rulespecs = append(rulespecs, "-m", "iprange", "--dst-range", strings.ReplaceAll(vars["destination"], "_128", ""))
 	} else {
-		rulespecs = append(rulespecs, "-d", strings.Replace(vars["destination"], "_", "/", -1))
+		rulespecs = append(rulespecs, "-d", strings.ReplaceAll(vars["destination"], "_", "/"))
 	}
 	rulespecs = append(rulespecs, "-j", "DNAT", "--to-destination", vars["nat_final"])
 	if r.URL.Query().Get("dport") != "" {
@@ -37,6 +37,7 @@ func dnatGenerateV6(r *http.Request) []string {
 	if r.URL.Query().Get("nth_every") != "" {
 		rulespecs = append(rulespecs, "-m", "statistic", "--mode", "nth", "--every", r.URL.Query().Get("nth_every"), "--packet", r.URL.Query().Get("nth_packet"))
 	}
+
 	return rulespecs
 }
 
@@ -46,17 +47,17 @@ func snatGenerateV6(r *http.Request) []string {
 	srcRange := strings.Contains(vars["source"], "-")
 	dstRange := strings.Contains(vars["destination"], "-")
 	if srcRange {
-		rulespecs = append(rulespecs, "-m", "iprange", "--src-range", strings.Replace(vars["source"], "_128", "", -1))
+		rulespecs = append(rulespecs, "-m", "iprange", "--src-range", strings.ReplaceAll(vars["source"], "_128", ""))
 	} else {
-		rulespecs = append(rulespecs, "-s", strings.Replace(vars["source"], "_", "/", -1))
+		rulespecs = append(rulespecs, "-s", strings.ReplaceAll(vars["source"], "_", "/"))
 	}
 	if r.URL.Query().Get("except") == trueStr {
 		rulespecs = append(rulespecs, "!")
 	}
 	if dstRange {
-		rulespecs = append(rulespecs, "-m", "iprange", "--dst-range", strings.Replace(vars["destination"], "_128", "", -1))
+		rulespecs = append(rulespecs, "-m", "iprange", "--dst-range", strings.ReplaceAll(vars["destination"], "_128", ""))
 	} else {
-		rulespecs = append(rulespecs, "-d", strings.Replace(vars["destination"], "_", "/", -1))
+		rulespecs = append(rulespecs, "-d", strings.ReplaceAll(vars["destination"], "_", "/"))
 	}
 	rulespecs = append(rulespecs, "-j", "SNAT", "--to-source", vars["nat_final"])
 	if r.URL.Query().Get("dport") != "" {
@@ -65,6 +66,7 @@ func snatGenerateV6(r *http.Request) []string {
 	if r.URL.Query().Get("nth_every") != "" {
 		rulespecs = append(rulespecs, "-m", "statistic", "--mode", "nth", "--every", r.URL.Query().Get("nth_every"), "--packet", r.URL.Query().Get("nth_packet"))
 	}
+
 	return rulespecs
 }
 
@@ -84,28 +86,28 @@ func checkPosNatV6(r *http.Request) ([]string, error) {
 
 	if source128 {
 		if (vars["action"] == dnatAct) && (r.URL.Query().Get("except") == trueStr) {
-			line = append(line, strings.Join([]string{"!", strings.Replace(vars["source"], "_128", "", -1)}, ""))
+			line = append(line, strings.Join([]string{"!", strings.ReplaceAll(vars["source"], "_128", "")}, ""))
 		} else {
-			line = append(line, strings.Replace(vars["source"], "_128", "", -1))
+			line = append(line, strings.ReplaceAll(vars["source"], "_128", ""))
 		}
 	} else {
 		if (vars["action"] == dnatAct) && (r.URL.Query().Get("except") == trueStr) {
-			line = append(line, strings.Join([]string{"!", strings.Replace(vars["source"], "_", "/", -1)}, ""))
+			line = append(line, strings.Join([]string{"!", strings.ReplaceAll(vars["source"], "_", "/")}, ""))
 		} else {
-			line = append(line, strings.Replace(vars["source"], "_", "/", -1))
+			line = append(line, strings.ReplaceAll(vars["source"], "_", "/"))
 		}
 	}
 	if destination128 {
 		if (vars["action"] == snatAct) && (r.URL.Query().Get("except") == trueStr) {
-			line = append(line, strings.Join([]string{"!", strings.Replace(vars["destination"], "_128", "", -1)}, ""))
+			line = append(line, strings.Join([]string{"!", strings.ReplaceAll(vars["destination"], "_128", "")}, ""))
 		} else {
-			line = append(line, strings.Replace(vars["destination"], "_128", "", -1))
+			line = append(line, strings.ReplaceAll(vars["destination"], "_128", ""))
 		}
 	} else {
 		if (vars["action"] == snatAct) && (r.URL.Query().Get("except") == trueStr) {
-			line = append(line, strings.Join([]string{"!", strings.Replace(vars["destination"], "_", "/", -1)}, ""))
+			line = append(line, strings.Join([]string{"!", strings.ReplaceAll(vars["destination"], "_", "/")}, ""))
 		} else {
-			line = append(line, strings.Replace(vars["destination"], "_", "/", -1))
+			line = append(line, strings.ReplaceAll(vars["destination"], "_", "/"))
 		}
 	}
 	if r.URL.Query().Get("dport") != "" {
@@ -139,6 +141,7 @@ func checkPosNatV6(r *http.Request) ([]string, error) {
 			linenumber = append(linenumber, natsSlice[0])
 		}
 	}
+
 	return linenumber, nil
 }
 
@@ -150,6 +153,7 @@ func addNatV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -157,6 +161,7 @@ func addNatV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	var rulespecs []string
@@ -164,11 +169,13 @@ func addNatV6(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("nth_every") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth every")
+
 			return
 		}
 		if r.URL.Query().Get("nth_packet") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth packet")
+
 			return
 		}
 	}
@@ -179,6 +186,7 @@ func addNatV6(w http.ResponseWriter, r *http.Request) {
 		rulespecs = snatGenerateV6(r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
+
 		return
 	}
 	if ipt.HasWait {
@@ -188,6 +196,7 @@ func addNatV6(w http.ResponseWriter, r *http.Request) {
 		position, err := strconv.Atoi(r.URL.Query().Get("position"))
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+
 			return
 		}
 		respErr = ipt.Insert("nat", vars["chain"], position, rulespecs...)
@@ -208,6 +217,7 @@ func delNatV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -216,6 +226,7 @@ func delNatV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	var rulespecs []string
@@ -223,11 +234,13 @@ func delNatV6(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("nth_every") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth every")
+
 			return
 		}
 		if r.URL.Query().Get("nth_packet") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth packet")
+
 			return
 		}
 	}
@@ -238,6 +251,7 @@ func delNatV6(w http.ResponseWriter, r *http.Request) {
 		rulespecs = snatGenerateV6(r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
+
 		return
 	}
 	if ipt.HasWait {
@@ -258,6 +272,7 @@ func checkNatV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -266,26 +281,30 @@ func checkNatV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	if r.URL.Query().Get("position") != "" {
 		posNat, err := checkPosNatV6(r)
-
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+
 			return
 		}
 		switch {
 		case len(posNat) == 0:
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		case len(posNat) != 1:
 			w.WriteHeader(http.StatusConflict)
+
 			return
 		case posNat[0] == r.URL.Query().Get("position"):
 			return
 		default:
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		}
 	}
@@ -294,11 +313,13 @@ func checkNatV6(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("nth_every") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth every")
+
 			return
 		}
 		if r.URL.Query().Get("nth_packet") == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, "Missing nth packet")
+
 			return
 		}
 	}
@@ -309,6 +330,7 @@ func checkNatV6(w http.ResponseWriter, r *http.Request) {
 		rulespecs = snatGenerateV6(r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
+
 		return
 	}
 	if ipt.HasWait {

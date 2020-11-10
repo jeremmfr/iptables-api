@@ -6,6 +6,9 @@ linters:
     - dupl
     - gochecknoglobals
     - lll
+    - godot
+    - wrapcheck
+    - nestif
 linters-settings:
   gocognit:
     # minimal code complexity to report, 30 by default

@@ -17,6 +17,7 @@ func addChain(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -25,6 +26,7 @@ func addChain(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.New()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	respErr = ipt.NewChain(vars["table"], vars["name"])
@@ -42,6 +44,7 @@ func delChain(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -50,6 +53,7 @@ func delChain(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.New()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	// Clear chain before delete
@@ -74,6 +78,7 @@ func listChain(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -82,6 +87,7 @@ func listChain(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.New()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	respStr, respErr := ipt.List(vars["table"], vars["name"])
@@ -102,6 +108,7 @@ func renameChain(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -110,6 +117,7 @@ func renameChain(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.New()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	respErr = ipt.RenameChain(vars["table"], vars["oldname"], vars["newname"])

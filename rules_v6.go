@@ -38,20 +38,21 @@ func ruleGenerateV6(r *http.Request) []string {
 	dstRange := strings.Contains(vars["destination"], "-")
 	ruleSpecs := []string{"-p", vars["proto"]}
 	if srcRange {
-		ruleSpecs = append(ruleSpecs, "-m", "iprange", "--src-range", strings.Replace(vars["source"], "_128", "", -1))
+		ruleSpecs = append(ruleSpecs, "-m", "iprange", "--src-range", strings.ReplaceAll(vars["source"], "_128", ""))
 	} else {
-		ruleSpecs = append(ruleSpecs, "-s", strings.Replace(vars["source"], "_", "/", -1))
+		ruleSpecs = append(ruleSpecs, "-s", strings.ReplaceAll(vars["source"], "_", "/"))
 	}
 	if dstRange {
-		ruleSpecs = append(ruleSpecs, "-m", "iprange", "--dst-range", strings.Replace(vars["destination"], "_128", "", -1))
+		ruleSpecs = append(ruleSpecs, "-m", "iprange", "--dst-range", strings.ReplaceAll(vars["destination"], "_128", ""))
 	} else {
-		ruleSpecs = append(ruleSpecs, "-d", strings.Replace(vars["destination"], "_", "/", -1))
+		ruleSpecs = append(ruleSpecs, "-d", strings.ReplaceAll(vars["destination"], "_", "/"))
 	}
 	ruleSpecs = append(ruleSpecs, "-j", vars["action"])
 	if (r.URL.Query().Get("log-prefix") != "") && vars["action"] == logAct {
 		ruleSpecs = append(ruleSpecs, "--log-prefix", r.URL.Query().Get("log-prefix"))
 	}
 	ruleSpecs = append(ruleSpecs, specEnd...)
+
 	return ruleSpecs
 }
 
@@ -68,9 +69,9 @@ func checkPosRulesV6(r *http.Request) ([]string, error) {
 	} else {
 		source128 := strings.Contains(vars["source"], "_128")
 		if source128 {
-			line = append(line, strings.Replace(vars["source"], "_128", "", -1))
+			line = append(line, strings.ReplaceAll(vars["source"], "_128", ""))
 		} else {
-			line = append(line, strings.Replace(vars["source"], "_", "/", -1))
+			line = append(line, strings.ReplaceAll(vars["source"], "_", "/"))
 		}
 	}
 
@@ -80,16 +81,16 @@ func checkPosRulesV6(r *http.Request) ([]string, error) {
 	} else {
 		destination128 := strings.Contains(vars["destination"], "_128")
 		if destination128 {
-			line = append(line, strings.Replace(vars["destination"], "_128", "", -1))
+			line = append(line, strings.ReplaceAll(vars["destination"], "_128", ""))
 		} else {
-			line = append(line, strings.Replace(vars["destination"], "_", "/", -1))
+			line = append(line, strings.ReplaceAll(vars["destination"], "_", "/"))
 		}
 	}
 	if srcRange {
-		line = append(line, "source", "IP", "range", strings.Replace(vars["source"], "_128", "", -1))
+		line = append(line, "source", "IP", "range", strings.ReplaceAll(vars["source"], "_128", ""))
 	}
 	if dstRange {
-		line = append(line, "destination", "IP", "range", strings.Replace(vars["destination"], "_128", "", -1))
+		line = append(line, "destination", "IP", "range", strings.ReplaceAll(vars["destination"], "_128", ""))
 	}
 	if r.URL.Query().Get("sports") != "" {
 		line = append(line, "multiport", "sports", r.URL.Query().Get("sports"))
@@ -122,6 +123,7 @@ func checkPosRulesV6(r *http.Request) ([]string, error) {
 			linenumber = append(linenumber, rulesSlice[0])
 		}
 	}
+
 	return linenumber, nil
 }
 
@@ -133,6 +135,7 @@ func addRulesV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -140,6 +143,7 @@ func addRulesV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	if ipt.HasWait {
@@ -150,6 +154,7 @@ func addRulesV6(w http.ResponseWriter, r *http.Request) {
 		position, err := strconv.Atoi(r.URL.Query().Get("position"))
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+
 			return
 		}
 		respErr = ipt.Insert("filter", vars["chain"], position, rulespecs...)
@@ -170,6 +175,7 @@ func delRulesV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -177,6 +183,7 @@ func delRulesV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	if ipt.HasWait {
@@ -198,6 +205,7 @@ func checkRulesV6(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -205,6 +213,7 @@ func checkRulesV6(w http.ResponseWriter, r *http.Request) {
 	ipt, err := iptables.NewWithProtocol(v6)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	if ipt.HasWait {
@@ -214,19 +223,23 @@ func checkRulesV6(w http.ResponseWriter, r *http.Request) {
 		posRules, err := checkPosRulesV6(r)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+
 			return
 		}
 		switch {
 		case len(posRules) == 0:
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		case len(posRules) != 1:
 			w.WriteHeader(http.StatusConflict)
+
 			return
 		case posRules[0] == r.URL.Query().Get("position"):
 			return
 		default:
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		}
 	} else {
@@ -235,10 +248,12 @@ func checkRulesV6(w http.ResponseWriter, r *http.Request) {
 		if respErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(w, respErr)
+
 			return
 		}
 		if !respStr {
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		}
 	}

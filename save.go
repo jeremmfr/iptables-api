@@ -20,6 +20,7 @@ func saveRules(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -27,21 +28,25 @@ func saveRules(w http.ResponseWriter, r *http.Request) {
 	err := os.MkdirAll("/etc/iptables/", 0755)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	stdout, err := exec.Command("iptables-save").Output()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
-	err = ioutil.WriteFile("/etc/iptables/rules.v4", stdout, 0644)
+	err = ioutil.WriteFile("/etc/iptables/rules.v4", stdout, 0644) // nolint: gosec
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	err = os.MkdirAll(*savePath, 0755)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 
@@ -51,6 +56,7 @@ func saveRules(w http.ResponseWriter, r *http.Request) {
 	err = cmd.Run()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 	fmt.Fprintln(w, strings.Join(dstFile, ""))
@@ -64,12 +70,14 @@ func restoreRules(w http.ResponseWriter, r *http.Request) {
 		usercheck := authenticator.CheckAuth(r)
 		if usercheck == "" {
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 	}
 	err := exec.Command("iptables-restore", r.URL.Query().Get("file")).Run()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+
 		return
 	}
 }
